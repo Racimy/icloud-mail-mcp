@@ -182,6 +182,7 @@ Check if environment variables are properly configured and show connection statu
    ```
 
 6. **Move messages between mailboxes:**
+
    ```json
    {
      "tool": "move_messages",
