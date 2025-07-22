@@ -180,6 +180,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["messageIds", "sourceMailbox", "destinationMailbox"],
         },
       },
+      {
+        name: "check_config",
+        description: "Check if environment variables are properly configured",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -350,6 +358,35 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "check_config": {
+        const maskCredential = (value: string | undefined) => {
+          if (!value) return "Not set";
+          if (value.length <= 4) return "***";
+          return value.substring(0, 4) + "***";
+        };
+
+        const config = {
+          email: {
+            value: maskCredential(process.env.ICLOUD_EMAIL),
+            configured: !!process.env.ICLOUD_EMAIL,
+          },
+          appPassword: {
+            value: maskCredential(process.env.ICLOUD_APP_PASSWORD),
+            configured: !!process.env.ICLOUD_APP_PASSWORD,
+          },
+          connectionStatus: mailClient ? "Connected" : "Not connected",
+        };
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(config, null, 2),
             },
           ],
         };

@@ -118,6 +118,12 @@ Move messages between mailboxes.
 - `sourceMailbox` (string, required): Source mailbox name
 - `destinationMailbox` (string, required): Destination mailbox name
 
+### `check_config`
+
+Check if environment variables are properly configured and show connection status.
+
+**Parameters:** None
+
 ## Usage Example
 
 1. **Start the MCP server:**
@@ -184,6 +190,14 @@ Move messages between mailboxes.
        "sourceMailbox": "INBOX",
        "destinationMailbox": "My Custom Folder"
      }
+   }
+   ```
+
+7. **Check configuration:**
+   ```json
+   {
+     "tool": "check_config",
+     "arguments": {}
    }
    ```
 
