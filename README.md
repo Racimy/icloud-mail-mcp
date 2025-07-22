@@ -37,11 +37,11 @@ pnpm run build
 
 ## Configuration
 
-You can configure the server in two ways:
+The server requires environment variables to be set for authentication. Configuration is done through your MCP client settings:
 
-### Environment Variables (Recommended)
+### Environment Variables (Required)
 
-For MCP server configuration, add to your MCP settings:
+Add to your MCP server configuration:
 
 ```json
 {
@@ -56,20 +56,7 @@ For MCP server configuration, add to your MCP settings:
 }
 ```
 
-### Manual Configuration
-
-Use the `configure_icloud` tool to set credentials at runtime.
-
 ## Available Tools
-
-### `configure_icloud`
-
-Configure your iCloud email account with app password authentication.
-
-**Parameters:**
-
-- `email` (string, required): Your iCloud email address (e.g., user@icloud.com)
-- `appPassword` (string, required): App-specific password generated for Mail
 
 ### `get_messages`
 
@@ -143,19 +130,7 @@ Move messages between mailboxes.
    pnpm run start
    ```
 
-2. **Configure your iCloud account (if not using environment variables):**
-
-   ```json
-   {
-     "tool": "configure_icloud",
-     "arguments": {
-       "email": "your-email@icloud.com",
-       "appPassword": "your-app-specific-password"
-     }
-   }
-   ```
-
-3. **Get recent messages:**
+2. **Get recent messages:**
 
    ```json
    {
@@ -167,7 +142,7 @@ Move messages between mailboxes.
    }
    ```
 
-4. **Send an email:**
+3. **Send an email:**
 
    ```json
    {
@@ -180,7 +155,7 @@ Move messages between mailboxes.
    }
    ```
 
-5. **Test connection:**
+4. **Test connection:**
 
    ```json
    {
@@ -189,7 +164,7 @@ Move messages between mailboxes.
    }
    ```
 
-6. **Create a new mailbox:**
+5. **Create a new mailbox:**
 
    ```json
    {
@@ -200,7 +175,7 @@ Move messages between mailboxes.
    }
    ```
 
-7. **Move messages between mailboxes:**
+6. **Move messages between mailboxes:**
    ```json
    {
      "tool": "move_messages",

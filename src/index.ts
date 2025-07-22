@@ -55,24 +55,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: "configure_icloud",
-        description: "Configure iCloud email account with App Password",
-        inputSchema: {
-          type: "object",
-          properties: {
-            email: {
-              type: "string",
-              description: "Your iCloud email address",
-            },
-            appPassword: {
-              type: "string",
-              description: "App-specific password for iCloud Mail",
-            },
-          },
-          required: ["email", "appPassword"],
-        },
-      },
-      {
         name: "get_messages",
         description: "Get email messages from specified mailbox",
         inputSchema: {
@@ -207,34 +189,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case "configure_icloud": {
-        const config: iCloudConfig = {
-          email: args?.email as string,
-          appPassword: args?.appPassword as string,
-          imapHost: "imap.mail.me.com",
-          imapPort: 993,
-          smtpHost: "smtp.mail.me.com",
-          smtpPort: 587,
-        };
-
-        mailClient = new iCloudMailClient(config);
-        await mailClient.connect();
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Successfully configured iCloud Mail for ${config.email}`,
-            },
-          ],
-        };
-      }
 
       case "get_messages": {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
@@ -262,7 +222,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
@@ -287,7 +247,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
@@ -310,7 +270,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
@@ -330,7 +290,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
@@ -350,7 +310,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
@@ -371,7 +331,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Use configure_icloud first."
+            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
           );
         }
 
