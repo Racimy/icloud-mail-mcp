@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   ErrorCode,
   McpError,
-} from "@modelcontextprotocol/sdk/types.js";
-import { iCloudMailClient } from "./lib/icloud-mail-client.js";
-import { iCloudConfig } from "./types/config.js";
+} from '@modelcontextprotocol/sdk/types.js';
+import { iCloudMailClient } from './lib/icloud-mail-client.js';
+import { iCloudConfig } from './types/config.js';
 
 const server = new Server(
   {
-    name: "icloud-mail-mcp",
-    version: "1.0.0",
+    name: 'icloud-mail-mcp',
+    version: '1.0.0',
   },
   {
     capabilities: {
@@ -31,9 +31,9 @@ async function initializeFromEnv() {
     const config: iCloudConfig = {
       email: process.env.ICLOUD_EMAIL,
       appPassword: process.env.ICLOUD_APP_PASSWORD,
-      imapHost: "imap.mail.me.com",
+      imapHost: 'imap.mail.me.com',
       imapPort: 993,
-      smtpHost: "smtp.mail.me.com",
+      smtpHost: 'smtp.mail.me.com',
       smtpPort: 587,
     };
 
@@ -42,7 +42,7 @@ async function initializeFromEnv() {
       await mailClient.connect();
       console.error(`Auto-configured iCloud Mail for ${config.email}`);
     } catch (error) {
-      console.error("Failed to auto-configure iCloud Mail:", error);
+      console.error('Failed to auto-configure iCloud Mail:', error);
       mailClient = null;
     }
   }
@@ -55,136 +55,136 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: "get_messages",
-        description: "Get email messages from specified mailbox",
+        name: 'get_messages',
+        description: 'Get email messages from specified mailbox',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {
             mailbox: {
-              type: "string",
-              description: "Mailbox name (default: INBOX)",
-              default: "INBOX",
+              type: 'string',
+              description: 'Mailbox name (default: INBOX)',
+              default: 'INBOX',
             },
             limit: {
-              type: "number",
-              description: "Maximum number of messages to retrieve",
+              type: 'number',
+              description: 'Maximum number of messages to retrieve',
               default: 10,
             },
             unreadOnly: {
-              type: "boolean",
-              description: "Retrieve only unread messages",
+              type: 'boolean',
+              description: 'Retrieve only unread messages',
               default: false,
             },
           },
         },
       },
       {
-        name: "send_email",
-        description: "Send an email through iCloud Mail",
+        name: 'send_email',
+        description: 'Send an email through iCloud Mail',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {
             to: {
               oneOf: [
-                { type: "string" },
-                { type: "array", items: { type: "string" } },
+                { type: 'string' },
+                { type: 'array', items: { type: 'string' } },
               ],
-              description: "Recipient email address(es)",
+              description: 'Recipient email address(es)',
             },
             subject: {
-              type: "string",
-              description: "Email subject",
+              type: 'string',
+              description: 'Email subject',
             },
             text: {
-              type: "string",
-              description: "Plain text email body",
+              type: 'string',
+              description: 'Plain text email body',
             },
             html: {
-              type: "string",
-              description: "HTML email body",
+              type: 'string',
+              description: 'HTML email body',
             },
           },
-          required: ["to", "subject"],
+          required: ['to', 'subject'],
         },
       },
       {
-        name: "mark_as_read",
-        description: "Mark email messages as read",
+        name: 'mark_as_read',
+        description: 'Mark email messages as read',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {
             messageIds: {
-              type: "array",
-              items: { type: "string" },
-              description: "Array of message IDs to mark as read",
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of message IDs to mark as read',
             },
             mailbox: {
-              type: "string",
-              description: "Mailbox name (default: INBOX)",
-              default: "INBOX",
+              type: 'string',
+              description: 'Mailbox name (default: INBOX)',
+              default: 'INBOX',
             },
           },
-          required: ["messageIds"],
+          required: ['messageIds'],
         },
       },
       {
-        name: "get_mailboxes",
-        description: "List all available mailboxes",
+        name: 'get_mailboxes',
+        description: 'List all available mailboxes',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {},
         },
       },
       {
-        name: "test_connection",
-        description: "Test the email server connection (IMAP and SMTP)",
+        name: 'test_connection',
+        description: 'Test the email server connection (IMAP and SMTP)',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {},
         },
       },
       {
-        name: "create_mailbox",
-        description: "Create a new mailbox (folder)",
+        name: 'create_mailbox',
+        description: 'Create a new mailbox (folder)',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {
             name: {
-              type: "string",
-              description: "Name of the mailbox to create",
+              type: 'string',
+              description: 'Name of the mailbox to create',
             },
           },
-          required: ["name"],
+          required: ['name'],
         },
       },
       {
-        name: "move_messages",
-        description: "Move messages between mailboxes",
+        name: 'move_messages',
+        description: 'Move messages between mailboxes',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {
             messageIds: {
-              type: "array",
-              items: { type: "string" },
-              description: "Array of message IDs to move",
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of message IDs to move',
             },
             sourceMailbox: {
-              type: "string",
-              description: "Source mailbox name",
+              type: 'string',
+              description: 'Source mailbox name',
             },
             destinationMailbox: {
-              type: "string",
-              description: "Destination mailbox name",
+              type: 'string',
+              description: 'Destination mailbox name',
             },
           },
-          required: ["messageIds", "sourceMailbox", "destinationMailbox"],
+          required: ['messageIds', 'sourceMailbox', 'destinationMailbox'],
         },
       },
       {
-        name: "check_config",
-        description: "Check if environment variables are properly configured",
+        name: 'check_config',
+        description: 'Check if environment variables are properly configured',
         inputSchema: {
-          type: "object",
+          type: 'object',
           properties: {},
         },
       },
@@ -197,16 +197,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-
-      case "get_messages": {
+      case 'get_messages': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
-        const mailbox = (args?.mailbox as string) || "INBOX";
+        const mailbox = (args?.mailbox as string) || 'INBOX';
         const limit = (args?.limit as number) || 10;
         const unreadOnly = (args?.unreadOnly as boolean) || false;
 
@@ -219,18 +218,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(messages, null, 2),
             },
           ],
         };
       }
 
-      case "send_email": {
+      case 'send_email': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
@@ -244,41 +243,41 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Email sent successfully. Message ID: ${result.messageId}`,
             },
           ],
         };
       }
 
-      case "mark_as_read": {
+      case 'mark_as_read': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
         const messageIds = args?.messageIds as string[];
-        const mailbox = (args?.mailbox as string) || "INBOX";
+        const mailbox = (args?.mailbox as string) || 'INBOX';
 
         await mailClient.markAsRead(messageIds, mailbox);
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Marked ${messageIds.length} messages as read`,
             },
           ],
         };
       }
 
-      case "get_mailboxes": {
+      case 'get_mailboxes': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
@@ -287,18 +286,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(mailboxes, null, 2),
             },
           ],
         };
       }
 
-      case "test_connection": {
+      case 'test_connection': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
@@ -307,18 +306,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(result, null, 2),
             },
           ],
         };
       }
 
-      case "create_mailbox": {
+      case 'create_mailbox': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
@@ -328,18 +327,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(result, null, 2),
             },
           ],
         };
       }
 
-      case "move_messages": {
+      case 'move_messages': {
         if (!mailClient) {
           throw new McpError(
             ErrorCode.InvalidRequest,
-            "iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables."
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
           );
         }
 
@@ -356,18 +355,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(result, null, 2),
             },
           ],
         };
       }
 
-      case "check_config": {
+      case 'check_config': {
         const maskCredential = (value: string | undefined) => {
-          if (!value) return "Not set";
-          if (value.length <= 4) return "***";
-          return value.substring(0, 4) + "***";
+          if (!value) return 'Not set';
+          if (value.length <= 4) return '***';
+          return value.substring(0, 4) + '***';
         };
 
         const config = {
@@ -379,13 +378,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             value: maskCredential(process.env.ICLOUD_APP_PASSWORD),
             configured: !!process.env.ICLOUD_APP_PASSWORD,
           },
-          connectionStatus: mailClient ? "Connected" : "Not connected",
+          connectionStatus: mailClient ? 'Connected' : 'Not connected',
         };
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(config, null, 2),
             },
           ],
@@ -411,10 +410,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("iCloud Mail MCP Server running on stdio");
+  console.error('iCloud Mail MCP Server running on stdio');
 }
 
 main().catch((error) => {
-  console.error("Server error:", error);
+  console.error('Server error:', error);
   process.exit(1);
 });

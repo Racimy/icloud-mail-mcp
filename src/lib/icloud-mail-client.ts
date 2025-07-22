@@ -1,12 +1,56 @@
-import Imap from "imap";
-import { simpleParser, ParsedMail } from "mailparser";
-import nodemailer from "nodemailer";
+import Imap from 'imap';
+import {
+  simpleParser,
+  ParsedMail,
+  Attachment as MailparserAttachment,
+  AddressObject as MailparserAddressObject,
+} from 'mailparser';
+import nodemailer from 'nodemailer';
 import {
   iCloudConfig,
   EmailMessage,
   SendEmailOptions,
   Attachment,
-} from "../types/config.js";
+} from '../types/config.js';
+
+// Type definitions for IMAP
+interface ImapBox {
+  attribs: string[];
+  delimiter: string;
+  children?: ImapBoxes;
+  parent?: ImapBox;
+}
+
+interface ImapBoxes {
+  [boxName: string]: ImapBox;
+}
+
+interface ImapMessage {
+  on(
+    event: 'body',
+    listener: (stream: NodeJS.ReadableStream, info: object) => void
+  ): this;
+  on(
+    event: 'attributes',
+    listener: (attrs: ImapMessageAttributes) => void
+  ): this;
+  once(event: 'end', listener: () => void): this;
+  once(
+    event: 'attributes',
+    listener: (attrs: ImapMessageAttributes) => void
+  ): this;
+}
+
+interface ImapMessageAttributes {
+  flags?: string[];
+  date?: Date;
+  struct?: unknown[];
+  size?: number;
+}
+
+// Remove unused ImapFetch interface
+
+// Use mailparser's AddressObject type instead
 
 export class iCloudMailClient {
   private imap: Imap;
@@ -22,11 +66,11 @@ export class iCloudMailClient {
     this.imap = new Imap({
       user: imapUsername,
       password: config.appPassword,
-      host: config.imapHost || "imap.mail.me.com",
+      host: config.imapHost || 'imap.mail.me.com',
       port: config.imapPort || 993,
       tls: true,
       tlsOptions: {
-        servername: config.imapHost || "imap.mail.me.com",
+        servername: config.imapHost || 'imap.mail.me.com',
         rejectUnauthorized: false, // Allow self-signed certificates if needed
       },
       authTimeout: 30000, // 30 seconds timeout
@@ -34,7 +78,7 @@ export class iCloudMailClient {
     });
 
     this.transporter = nodemailer.createTransport({
-      host: config.smtpHost || "smtp.mail.me.com",
+      host: config.smtpHost || 'smtp.mail.me.com',
       port: config.smtpPort || 587,
       secure: false, // Use STARTTLS
       requireTLS: true, // Force TLS
@@ -50,36 +94,36 @@ export class iCloudMailClient {
 
   private extractEmailName(email: string): string {
     // Extract username part from email (e.g., "john@icloud.com" -> "john")
-    const atIndex = email.indexOf("@");
+    const atIndex = email.indexOf('@');
     return atIndex > 0 ? email.substring(0, atIndex) : email;
   }
 
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.imap.once("ready", () => {
-        console.error("IMAP connection ready");
+      this.imap.once('ready', () => {
+        console.error('IMAP connection ready');
         resolve();
       });
 
-      this.imap.once("error", (err: Error) => {
-        console.error("IMAP connection error:", err);
+      this.imap.once('error', (err: Error) => {
+        console.error('IMAP connection error:', err);
 
         // Try with full email if username-only failed
         if (
-          err.message.includes("authenticate") ||
-          err.message.includes("Invalid credentials")
+          err.message.includes('authenticate') ||
+          err.message.includes('Invalid credentials')
         ) {
-          console.error("Retrying IMAP connection with full email address...");
+          console.error('Retrying IMAP connection with full email address...');
 
           // Recreate IMAP with full email
           this.imap = new Imap({
             user: this.config.email, // Use full email instead of username
             password: this.config.appPassword,
-            host: this.config.imapHost || "imap.mail.me.com",
+            host: this.config.imapHost || 'imap.mail.me.com',
             port: this.config.imapPort || 993,
             tls: true,
             tlsOptions: {
-              servername: this.config.imapHost || "imap.mail.me.com",
+              servername: this.config.imapHost || 'imap.mail.me.com',
               rejectUnauthorized: false,
             },
             authTimeout: 30000,
@@ -87,14 +131,14 @@ export class iCloudMailClient {
           });
 
           // Try connecting again with full email
-          this.imap.once("ready", () => {
-            console.error("IMAP connection ready (with full email)");
+          this.imap.once('ready', () => {
+            console.error('IMAP connection ready (with full email)');
             resolve();
           });
 
-          this.imap.once("error", (retryErr: Error) => {
+          this.imap.once('error', (retryErr: Error) => {
             console.error(
-              "IMAP connection failed even with full email:",
+              'IMAP connection failed even with full email:',
               retryErr
             );
             reject(
@@ -116,55 +160,55 @@ export class iCloudMailClient {
 
   async testConnection(): Promise<{ status: string; message: string }> {
     try {
-      console.error("Testing IMAP connection...");
+      console.error('Testing IMAP connection...');
       await this.connect();
-      console.error("IMAP connection successful, disconnecting...");
+      console.error('IMAP connection successful, disconnecting...');
       await this.disconnect();
 
-      console.error("Testing SMTP connection...");
+      console.error('Testing SMTP connection...');
       // Test SMTP connection with timeout
       await Promise.race([
         this.transporter.verify(),
         new Promise((_, reject) =>
           setTimeout(
             () =>
-              reject(new Error("SMTP verification timeout after 30 seconds")),
+              reject(new Error('SMTP verification timeout after 30 seconds')),
             30000
           )
         ),
       ]);
 
-      console.error("SMTP connection successful");
+      console.error('SMTP connection successful');
 
       return {
-        status: "success",
+        status: 'success',
         message:
-          "Email connection test successful - both IMAP and SMTP are working",
+          'Email connection test successful - both IMAP and SMTP are working',
       };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error("Connection test failed:", errorMessage);
+      console.error('Connection test failed:', errorMessage);
 
       // Provide helpful error messages based on common issues
       let helpfulMessage = errorMessage;
       if (
-        errorMessage.includes("authenticate") ||
-        errorMessage.includes("Invalid credentials")
+        errorMessage.includes('authenticate') ||
+        errorMessage.includes('Invalid credentials')
       ) {
         helpfulMessage +=
           "\n\nTroubleshooting:\n1. Ensure you're using an app-specific password, not your regular Apple ID password\n2. Verify that two-factor authentication is enabled on your Apple ID\n3. Generate a new app-specific password if the current one isn't working\n4. Check that your Apple ID hasn't been locked";
       } else if (
-        errorMessage.includes("timeout") ||
-        errorMessage.includes("ENOTFOUND") ||
-        errorMessage.includes("ECONNREFUSED")
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('ENOTFOUND') ||
+        errorMessage.includes('ECONNREFUSED')
       ) {
         helpfulMessage +=
-          "\n\nTroubleshooting:\n1. Check your internet connection\n2. Verify firewall settings allow connections to iCloud mail servers\n3. Try connecting from a different network";
+          '\n\nTroubleshooting:\n1. Check your internet connection\n2. Verify firewall settings allow connections to iCloud mail servers\n3. Try connecting from a different network';
       }
 
       return {
-        status: "error",
+        status: 'error',
         message: helpfulMessage,
       };
     }
@@ -172,16 +216,16 @@ export class iCloudMailClient {
 
   async disconnect(): Promise<void> {
     return new Promise((resolve) => {
-      this.imap.once("end", () => {
+      this.imap.once('end', () => {
         resolve();
       });
       this.imap.end();
     });
   }
 
-  async getMailboxes(): Promise<any> {
+  async getMailboxes(): Promise<ImapBoxes> {
     return new Promise((resolve, reject) => {
-      this.imap.getBoxes((err: Error, boxes: any) => {
+      this.imap.getBoxes((err: Error, boxes: ImapBoxes) => {
         if (err) {
           reject(err);
           return;
@@ -192,7 +236,7 @@ export class iCloudMailClient {
   }
 
   async getMessages(
-    mailbox: string = "INBOX",
+    mailbox: string = 'INBOX',
     limit: number = 10,
     unreadOnly: boolean = false
   ): Promise<EmailMessage[]> {
@@ -203,7 +247,7 @@ export class iCloudMailClient {
           return;
         }
 
-        const searchCriteria = unreadOnly ? ["UNSEEN"] : ["ALL"];
+        const searchCriteria = unreadOnly ? ['UNSEEN'] : ['ALL'];
 
         this.imap.search(searchCriteria, (err: Error, results: number[]) => {
           if (err) {
@@ -218,42 +262,47 @@ export class iCloudMailClient {
 
           const messageIds = results.slice(-limit);
           const fetch = this.imap.fetch(messageIds, {
-            bodies: "",
+            bodies: '',
             struct: true,
           });
 
           const messages: EmailMessage[] = [];
 
-          fetch.on("message", (msg: any, seqno: number) => {
-            let emailData = "";
+          fetch.on('message', (msg: ImapMessage, seqno: number) => {
+            let emailData = '';
 
-            msg.on("body", (stream: NodeJS.ReadableStream) => {
-              stream.on("data", (chunk: Buffer) => {
-                emailData += chunk.toString("utf8");
+            msg.on('body', (stream: NodeJS.ReadableStream) => {
+              stream.on('data', (chunk: Buffer) => {
+                emailData += chunk.toString('utf8');
               });
 
-              stream.once("end", async () => {
+              stream.once('end', async () => {
                 try {
                   const parsed: ParsedMail = await simpleParser(emailData);
 
                   const attachments: Attachment[] = [];
                   if (parsed.attachments) {
-                    parsed.attachments.forEach((att: any) => {
+                    parsed.attachments.forEach((att: MailparserAttachment) => {
                       attachments.push({
-                        filename: att.filename || "unknown",
+                        filename: att.filename || 'unknown',
                         contentType:
-                          att.contentType || "application/octet-stream",
+                          att.contentType || 'application/octet-stream',
                         size: att.size || 0,
                         data: att.content,
                       });
                     });
                   }
 
-                  const getEmailText = (addr: any) => {
-                    if (!addr) return "";
+                  const getEmailText = (
+                    addr:
+                      | MailparserAddressObject
+                      | MailparserAddressObject[]
+                      | undefined
+                  ) => {
+                    if (!addr) return '';
                     if (Array.isArray(addr))
-                      return addr.map((a) => a.text || a.address).join(", ");
-                    return addr.text || addr.address || "";
+                      return addr.map((a) => a.text).join(', ');
+                    return addr.text;
                   };
 
                   const emailMessage: EmailMessage = {
@@ -264,8 +313,8 @@ export class iCloudMailClient {
                         ? parsed.to.map((t) => getEmailText(t))
                         : [getEmailText(parsed.to)]
                       : [],
-                    subject: parsed.subject || "",
-                    body: parsed.text || parsed.html || "",
+                    subject: parsed.subject || '',
+                    body: parsed.text || parsed.html || '',
                     date: parsed.date || new Date(),
                     flags: [],
                     attachments:
@@ -274,12 +323,12 @@ export class iCloudMailClient {
 
                   messages.push(emailMessage);
                 } catch (parseError) {
-                  console.error("Error parsing email:", parseError);
+                  console.error('Error parsing email:', parseError);
                 }
               });
             });
 
-            msg.once("attributes", (attrs: any) => {
+            msg.once('attributes', (attrs: ImapMessageAttributes) => {
               if (attrs.flags) {
                 const lastMessage = messages[messages.length - 1];
                 if (lastMessage) {
@@ -289,11 +338,11 @@ export class iCloudMailClient {
             });
           });
 
-          fetch.once("error", (fetchErr: Error) => {
+          fetch.once('error', (fetchErr: Error) => {
             reject(fetchErr);
           });
 
-          fetch.once("end", () => {
+          fetch.once('end', () => {
             resolve(messages);
           });
         });
@@ -331,7 +380,7 @@ export class iCloudMailClient {
 
   async markAsRead(
     messageIds: string[],
-    mailbox: string = "INBOX"
+    mailbox: string = 'INBOX'
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       this.imap.openBox(mailbox, false, (err: Error) => {
@@ -340,7 +389,7 @@ export class iCloudMailClient {
           return;
         }
 
-        this.imap.search(["ALL"], (err: Error, results: number[]) => {
+        this.imap.search(['ALL'], (err: Error, results: number[]) => {
           if (err) {
             reject(err);
             return;
@@ -351,7 +400,7 @@ export class iCloudMailClient {
             return;
           }
 
-          this.imap.addFlags(results, ["\\Seen"], (err: Error) => {
+          this.imap.addFlags(results, ['\\Seen'], (err: Error) => {
             if (err) {
               reject(err);
               return;
@@ -370,14 +419,14 @@ export class iCloudMailClient {
       this.imap.addBox(name, (err: Error) => {
         if (err) {
           resolve({
-            status: "error",
+            status: 'error',
             message: err.message,
           });
           return;
         }
 
         resolve({
-          status: "success",
+          status: 'success',
           message: `Mailbox '${name}' created successfully`,
         });
       });
@@ -393,17 +442,17 @@ export class iCloudMailClient {
       this.imap.openBox(sourceMailbox, false, (err: Error) => {
         if (err) {
           resolve({
-            status: "error",
+            status: 'error',
             message: `Failed to open source mailbox '${sourceMailbox}': ${err.message}`,
           });
           return;
         }
 
         // Search for all messages to get sequence numbers
-        this.imap.search(["ALL"], (err: Error, results: number[]) => {
+        this.imap.search(['ALL'], (err: Error, results: number[]) => {
           if (err) {
             resolve({
-              status: "error",
+              status: 'error',
               message: `Failed to search messages: ${err.message}`,
             });
             return;
@@ -411,8 +460,8 @@ export class iCloudMailClient {
 
           if (!results || results.length === 0) {
             resolve({
-              status: "error",
-              message: "No messages found in source mailbox",
+              status: 'error',
+              message: 'No messages found in source mailbox',
             });
             return;
           }
@@ -421,14 +470,14 @@ export class iCloudMailClient {
           this.imap.move(results, destinationMailbox, (err: Error) => {
             if (err) {
               resolve({
-                status: "error",
+                status: 'error',
                 message: `Failed to move messages: ${err.message}`,
               });
               return;
             }
 
             resolve({
-              status: "success",
+              status: 'success',
               message: `Successfully moved ${results.length} messages from '${sourceMailbox}' to '${destinationMailbox}'`,
             });
           });
