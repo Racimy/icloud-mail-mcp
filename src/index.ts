@@ -175,6 +175,29 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["name"],
         },
       },
+      {
+        name: "move_messages",
+        description: "Move messages between mailboxes",
+        inputSchema: {
+          type: "object",
+          properties: {
+            messageIds: {
+              type: "array",
+              items: { type: "string" },
+              description: "Array of message IDs to move",
+            },
+            sourceMailbox: {
+              type: "string",
+              description: "Source mailbox name",
+            },
+            destinationMailbox: {
+              type: "string",
+              description: "Destination mailbox name",
+            },
+          },
+          required: ["messageIds", "sourceMailbox", "destinationMailbox"],
+        },
+      },
     ],
   };
 });
@@ -333,6 +356,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         const mailboxName = args?.name as string;
         const result = await mailClient.createMailbox(mailboxName);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "move_messages": {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            "iCloud Mail not configured. Use configure_icloud first."
+          );
+        }
+
+        const messageIds = args?.messageIds as string[];
+        const sourceMailbox = args?.sourceMailbox as string;
+        const destinationMailbox = args?.destinationMailbox as string;
+
+        const result = await mailClient.moveMessages(
+          messageIds,
+          sourceMailbox,
+          destinationMailbox
+        );
 
         return {
           content: [

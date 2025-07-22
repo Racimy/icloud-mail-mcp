@@ -286,4 +286,57 @@ export class iCloudMailClient {
       });
     });
   }
+
+  async moveMessages(
+    messageIds: string[],
+    sourceMailbox: string,
+    destinationMailbox: string
+  ): Promise<{ status: string; message: string }> {
+    return new Promise((resolve) => {
+      this.imap.openBox(sourceMailbox, false, (err: Error) => {
+        if (err) {
+          resolve({
+            status: "error",
+            message: `Failed to open source mailbox '${sourceMailbox}': ${err.message}`,
+          });
+          return;
+        }
+
+        // Search for all messages to get sequence numbers
+        this.imap.search(["ALL"], (err: Error, results: number[]) => {
+          if (err) {
+            resolve({
+              status: "error",
+              message: `Failed to search messages: ${err.message}`,
+            });
+            return;
+          }
+
+          if (!results || results.length === 0) {
+            resolve({
+              status: "error",
+              message: "No messages found in source mailbox",
+            });
+            return;
+          }
+
+          // Use the sequence numbers for moving
+          this.imap.move(results, destinationMailbox, (err: Error) => {
+            if (err) {
+              resolve({
+                status: "error",
+                message: `Failed to move messages: ${err.message}`,
+              });
+              return;
+            }
+
+            resolve({
+              status: "success",
+              message: `Successfully moved ${results.length} messages from '${sourceMailbox}' to '${destinationMailbox}'`,
+            });
+          });
+        });
+      });
+    });
+  }
 }

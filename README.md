@@ -118,7 +118,18 @@ Test the email server connection to verify IMAP and SMTP connectivity.
 Create a new mailbox (folder) in your iCloud Mail account.
 
 **Parameters:**
+
 - `name` (string, required): Name of the mailbox to create
+
+### `move_messages`
+
+Move messages between mailboxes.
+
+**Parameters:**
+
+- `messageIds` (array, required): Array of message IDs to move
+- `sourceMailbox` (string, required): Source mailbox name
+- `destinationMailbox` (string, required): Destination mailbox name
 
 ## Usage Example
 
@@ -157,6 +168,7 @@ Create a new mailbox (folder) in your iCloud Mail account.
    ```
 
 4. **Send an email:**
+
    ```json
    {
      "tool": "send_email",
@@ -169,6 +181,7 @@ Create a new mailbox (folder) in your iCloud Mail account.
    ```
 
 5. **Test connection:**
+
    ```json
    {
      "tool": "test_connection",
@@ -177,11 +190,24 @@ Create a new mailbox (folder) in your iCloud Mail account.
    ```
 
 6. **Create a new mailbox:**
+
    ```json
    {
      "tool": "create_mailbox",
      "arguments": {
        "name": "My Custom Folder"
+     }
+   }
+   ```
+
+7. **Move messages between mailboxes:**
+   ```json
+   {
+     "tool": "move_messages",
+     "arguments": {
+       "messageIds": ["message-id-1", "message-id-2"],
+       "sourceMailbox": "INBOX",
+       "destinationMailbox": "My Custom Folder"
      }
    }
    ```
