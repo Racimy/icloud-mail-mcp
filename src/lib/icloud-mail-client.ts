@@ -16,24 +16,42 @@ export class iCloudMailClient {
   constructor(config: iCloudConfig) {
     this.config = config;
 
+    // For IMAP, try email name first (e.g., "johnappleseed"), fallback to full email
+    const imapUsername = this.extractEmailName(config.email);
+
     this.imap = new Imap({
-      user: config.email,
+      user: imapUsername,
       password: config.appPassword,
       host: config.imapHost || "imap.mail.me.com",
       port: config.imapPort || 993,
       tls: true,
-      tlsOptions: { servername: config.imapHost || "imap.mail.me.com" },
+      tlsOptions: {
+        servername: config.imapHost || "imap.mail.me.com",
+        rejectUnauthorized: false, // Allow self-signed certificates if needed
+      },
+      authTimeout: 30000, // 30 seconds timeout
+      connTimeout: 30000,
     });
 
     this.transporter = nodemailer.createTransport({
       host: config.smtpHost || "smtp.mail.me.com",
       port: config.smtpPort || 587,
-      secure: false,
+      secure: false, // Use STARTTLS
+      requireTLS: true, // Force TLS
       auth: {
-        user: config.email,
+        user: config.email, // SMTP requires full email address
         pass: config.appPassword,
       },
+      tls: {
+        rejectUnauthorized: false, // Allow self-signed certificates if needed
+      },
     });
+  }
+
+  private extractEmailName(email: string): string {
+    // Extract username part from email (e.g., "john@icloud.com" -> "john")
+    const atIndex = email.indexOf("@");
+    return atIndex > 0 ? email.substring(0, atIndex) : email;
   }
 
   async connect(): Promise<void> {
@@ -45,7 +63,51 @@ export class iCloudMailClient {
 
       this.imap.once("error", (err: Error) => {
         console.error("IMAP connection error:", err);
-        reject(err);
+
+        // Try with full email if username-only failed
+        if (
+          err.message.includes("authenticate") ||
+          err.message.includes("Invalid credentials")
+        ) {
+          console.error("Retrying IMAP connection with full email address...");
+
+          // Recreate IMAP with full email
+          this.imap = new Imap({
+            user: this.config.email, // Use full email instead of username
+            password: this.config.appPassword,
+            host: this.config.imapHost || "imap.mail.me.com",
+            port: this.config.imapPort || 993,
+            tls: true,
+            tlsOptions: {
+              servername: this.config.imapHost || "imap.mail.me.com",
+              rejectUnauthorized: false,
+            },
+            authTimeout: 30000,
+            connTimeout: 30000,
+          });
+
+          // Try connecting again with full email
+          this.imap.once("ready", () => {
+            console.error("IMAP connection ready (with full email)");
+            resolve();
+          });
+
+          this.imap.once("error", (retryErr: Error) => {
+            console.error(
+              "IMAP connection failed even with full email:",
+              retryErr
+            );
+            reject(
+              new Error(
+                `IMAP authentication failed. Please check your app-specific password and ensure two-factor authentication is enabled. Details: ${retryErr.message}`
+              )
+            );
+          });
+
+          this.imap.connect();
+        } else {
+          reject(new Error(`IMAP connection failed: ${err.message}`));
+        }
       });
 
       this.imap.connect();
@@ -54,11 +116,25 @@ export class iCloudMailClient {
 
   async testConnection(): Promise<{ status: string; message: string }> {
     try {
+      console.error("Testing IMAP connection...");
       await this.connect();
+      console.error("IMAP connection successful, disconnecting...");
       await this.disconnect();
 
-      // Test SMTP connection
-      await this.transporter.verify();
+      console.error("Testing SMTP connection...");
+      // Test SMTP connection with timeout
+      await Promise.race([
+        this.transporter.verify(),
+        new Promise((_, reject) =>
+          setTimeout(
+            () =>
+              reject(new Error("SMTP verification timeout after 30 seconds")),
+            30000
+          )
+        ),
+      ]);
+
+      console.error("SMTP connection successful");
 
       return {
         status: "success",
@@ -66,9 +142,30 @@ export class iCloudMailClient {
           "Email connection test successful - both IMAP and SMTP are working",
       };
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error("Connection test failed:", errorMessage);
+
+      // Provide helpful error messages based on common issues
+      let helpfulMessage = errorMessage;
+      if (
+        errorMessage.includes("authenticate") ||
+        errorMessage.includes("Invalid credentials")
+      ) {
+        helpfulMessage +=
+          "\n\nTroubleshooting:\n1. Ensure you're using an app-specific password, not your regular Apple ID password\n2. Verify that two-factor authentication is enabled on your Apple ID\n3. Generate a new app-specific password if the current one isn't working\n4. Check that your Apple ID hasn't been locked";
+      } else if (
+        errorMessage.includes("timeout") ||
+        errorMessage.includes("ENOTFOUND") ||
+        errorMessage.includes("ECONNREFUSED")
+      ) {
+        helpfulMessage +=
+          "\n\nTroubleshooting:\n1. Check your internet connection\n2. Verify firewall settings allow connections to iCloud mail servers\n3. Try connecting from a different network";
+      }
+
       return {
         status: "error",
-        message: error instanceof Error ? error.message : String(error),
+        message: helpfulMessage,
       };
     }
   }
