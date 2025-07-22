@@ -1,0 +1,36 @@
+{
+  "name": "icloud-mail-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for iCloud Mail integration with App Password authentication",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node --inspect dist/index.js",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "icloud",
+    "mail",
+    "email"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.1",
+    "nodemailer": "^6.9.0"
+  },
+  "devDependencies": {
+    "@types/imap": "^0.8.37",
+    "@types/mailparser": "^3.4.0",
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.15",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
