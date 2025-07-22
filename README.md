@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server for integrating with iCloud Mail using App Password authentication. This server provides tools to read, send, and manage emails through iCloud's IMAP and SMTP services.
 
+> Development logs for this project are being shared on [Hack Club's Summer of Making](https://summer.hackclub.com/projects/7559). Check it out to follow the development journey!
+
 ## Features
 
 - **Secure Authentication**: Uses App-specific passwords for secure iCloud Mail access
@@ -38,7 +40,9 @@ pnpm run build
 You can configure the server in two ways:
 
 ### Environment Variables (Recommended)
+
 For MCP server configuration, add to your MCP settings:
+
 ```json
 {
   "icloud-mail-mcp": {
@@ -53,6 +57,7 @@ For MCP server configuration, add to your MCP settings:
 ```
 
 ### Manual Configuration
+
 Use the `configure_icloud` tool to set credentials at runtime.
 
 ## Available Tools
@@ -109,7 +114,7 @@ List all available mailboxes in your iCloud Mail account.
    ```bash
    # With environment variables (recommended)
    ICLOUD_EMAIL="your-email@icloud.com" ICLOUD_APP_PASSWORD="your-app-password" pnpm run start
-   
+
    # Or start normally and configure manually
    pnpm run start
    ```
