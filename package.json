@@ -16,8 +16,16 @@
     "mail",
     "email"
   ],
-  "author": "",
+  "author": "minagishl",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/minagishl/icloud-mail-mcp.git"
+  },
+  "homepage": "https://github.com/minagishl/icloud-mail-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/minagishl/icloud-mail-mcp/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "imap": "^0.8.19",
