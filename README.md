@@ -107,6 +107,12 @@ List all available mailboxes in your iCloud Mail account.
 
 **Parameters:** None
 
+### `test_connection`
+
+Test the email server connection to verify IMAP and SMTP connectivity.
+
+**Parameters:** None
+
 ## Usage Example
 
 1. **Start the MCP server:**
@@ -152,6 +158,14 @@ List all available mailboxes in your iCloud Mail account.
        "subject": "Hello from MCP",
        "text": "This email was sent using the iCloud Mail MCP server!"
      }
+   }
+   ```
+
+5. **Test connection:**
+   ```json
+   {
+     "tool": "test_connection",
+     "arguments": {}
    }
    ```
 

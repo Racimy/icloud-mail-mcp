@@ -52,6 +52,26 @@ export class iCloudMailClient {
     });
   }
 
+  async testConnection(): Promise<{ status: string; message: string }> {
+    try {
+      await this.connect();
+      await this.disconnect();
+      
+      // Test SMTP connection
+      await this.transporter.verify();
+      
+      return {
+        status: "success",
+        message: "Email connection test successful - both IMAP and SMTP are working"
+      };
+    } catch (error) {
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
   async disconnect(): Promise<void> {
     return new Promise((resolve) => {
       this.imap.once("end", () => {

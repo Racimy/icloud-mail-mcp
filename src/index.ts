@@ -153,6 +153,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: "test_connection",
+        description: "Test the email server connection (IMAP and SMTP)",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -276,6 +284,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(mailboxes, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "test_connection": {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            "iCloud Mail not configured. Use configure_icloud first."
+          );
+        }
+
+        const result = await mailClient.testConnection();
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };
