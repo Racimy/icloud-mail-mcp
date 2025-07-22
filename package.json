@@ -8,7 +8,11 @@
     "build": "node scripts/build.mjs",
     "dev": "node --inspect dist/index.js",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "mcp",
@@ -33,11 +37,18 @@
     "nodemailer": "^6.9.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.31.0",
     "@types/imap": "^0.8.37",
     "@types/mailparser": "^3.4.0",
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^6.4.15",
     "esbuild": "^0.19.0",
-    "typescript": "^5.5.0"
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.38.0"
   }
 }
