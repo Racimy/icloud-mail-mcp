@@ -36,7 +36,7 @@ async function initializeFromEnv() {
       smtpHost: "smtp.mail.me.com",
       smtpPort: 587,
     };
-    
+
     try {
       mailClient = new iCloudMailClient(config);
       await mailClient.connect();
@@ -159,6 +159,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: "object",
           properties: {},
+        },
+      },
+      {
+        name: "create_mailbox",
+        description: "Create a new mailbox (folder)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "Name of the mailbox to create",
+            },
+          },
+          required: ["name"],
         },
       },
     ],
@@ -298,6 +312,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
 
         const result = await mailClient.testConnection();
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "create_mailbox": {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            "iCloud Mail not configured. Use configure_icloud first."
+          );
+        }
+
+        const mailboxName = args?.name as string;
+        const result = await mailClient.createMailbox(mailboxName);
 
         return {
           content: [

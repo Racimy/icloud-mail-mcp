@@ -113,6 +113,13 @@ Test the email server connection to verify IMAP and SMTP connectivity.
 
 **Parameters:** None
 
+### `create_mailbox`
+
+Create a new mailbox (folder) in your iCloud Mail account.
+
+**Parameters:**
+- `name` (string, required): Name of the mailbox to create
+
 ## Usage Example
 
 1. **Start the MCP server:**
@@ -166,6 +173,16 @@ Test the email server connection to verify IMAP and SMTP connectivity.
    {
      "tool": "test_connection",
      "arguments": {}
+   }
+   ```
+
+6. **Create a new mailbox:**
+   ```json
+   {
+     "tool": "create_mailbox",
+     "arguments": {
+       "name": "My Custom Folder"
+     }
    }
    ```
 

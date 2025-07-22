@@ -56,18 +56,19 @@ export class iCloudMailClient {
     try {
       await this.connect();
       await this.disconnect();
-      
+
       // Test SMTP connection
       await this.transporter.verify();
-      
+
       return {
         status: "success",
-        message: "Email connection test successful - both IMAP and SMTP are working"
+        message:
+          "Email connection test successful - both IMAP and SMTP are working",
       };
     } catch (error) {
       return {
         status: "error",
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -260,6 +261,27 @@ export class iCloudMailClient {
             }
             resolve();
           });
+        });
+      });
+    });
+  }
+
+  async createMailbox(
+    name: string
+  ): Promise<{ status: string; message: string }> {
+    return new Promise((resolve) => {
+      this.imap.addBox(name, (err: Error) => {
+        if (err) {
+          resolve({
+            status: "error",
+            message: err.message,
+          });
+          return;
+        }
+
+        resolve({
+          status: "success",
+          message: `Mailbox '${name}' created successfully`,
         });
       });
     });
