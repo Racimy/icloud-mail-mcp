@@ -25,6 +25,32 @@ const server = new Server(
 
 let mailClient: iCloudMailClient | null = null;
 
+// Initialize with environment variables if available
+async function initializeFromEnv() {
+  if (process.env.ICLOUD_EMAIL && process.env.ICLOUD_APP_PASSWORD) {
+    const config: iCloudConfig = {
+      email: process.env.ICLOUD_EMAIL,
+      appPassword: process.env.ICLOUD_APP_PASSWORD,
+      imapHost: "imap.mail.me.com",
+      imapPort: 993,
+      smtpHost: "smtp.mail.me.com",
+      smtpPort: 587,
+    };
+    
+    try {
+      mailClient = new iCloudMailClient(config);
+      await mailClient.connect();
+      console.error(`Auto-configured iCloud Mail for ${config.email}`);
+    } catch (error) {
+      console.error("Failed to auto-configure iCloud Mail:", error);
+      mailClient = null;
+    }
+  }
+}
+
+// Initialize on startup
+initializeFromEnv();
+
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [

@@ -35,7 +35,25 @@ pnpm run build
 
 ## Configuration
 
-The server requires your iCloud email and app password to be configured before use. This is done through the `configure_icloud` tool.
+You can configure the server in two ways:
+
+### Environment Variables (Recommended)
+For MCP server configuration, add to your MCP settings:
+```json
+{
+  "icloud-mail-mcp": {
+    "command": "node",
+    "args": ["/path/to/icloud-mail-mcp/dist/index.js"],
+    "env": {
+      "ICLOUD_EMAIL": "your-email@icloud.com",
+      "ICLOUD_APP_PASSWORD": "your-app-specific-password"
+    }
+  }
+}
+```
+
+### Manual Configuration
+Use the `configure_icloud` tool to set credentials at runtime.
 
 ## Available Tools
 
@@ -89,10 +107,14 @@ List all available mailboxes in your iCloud Mail account.
 1. **Start the MCP server:**
 
    ```bash
+   # With environment variables (recommended)
+   ICLOUD_EMAIL="your-email@icloud.com" ICLOUD_APP_PASSWORD="your-app-password" pnpm run start
+   
+   # Or start normally and configure manually
    pnpm run start
    ```
 
-2. **Configure your iCloud account:**
+2. **Configure your iCloud account (if not using environment variables):**
 
    ```json
    {
