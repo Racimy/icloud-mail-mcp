@@ -11,6 +11,7 @@ import {
   EmailMessage,
   SendEmailOptions,
   Attachment,
+  SearchOptions,
 } from '../types/config.js';
 
 // Type definitions for IMAP
@@ -530,6 +531,161 @@ export class iCloudMailClient {
               status: 'success',
               message: `Successfully moved ${results.length} messages from '${sourceMailbox}' to '${destinationMailbox}'`,
             });
+          });
+        });
+      });
+    });
+  }
+
+  async searchMessages(options: SearchOptions): Promise<EmailMessage[]> {
+    const {
+      query,
+      mailbox = 'INBOX',
+      limit = 10,
+      dateFrom,
+      dateTo,
+      fromEmail,
+      unreadOnly = false,
+    } = options;
+
+    return new Promise((resolve, reject) => {
+      this.imap.openBox(mailbox, true, (err: Error) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        type SearchCriterion =
+          | string
+          | [string, string | Date]
+          | [string, [string, string], [string, string]];
+        const searchCriteria: SearchCriterion[] = [];
+
+        if (unreadOnly) {
+          searchCriteria.push('UNSEEN');
+        }
+
+        if (dateFrom) {
+          const date = new Date(dateFrom);
+          if (!isNaN(date.getTime())) {
+            searchCriteria.push(['SINCE', date]);
+          }
+        }
+
+        if (dateTo) {
+          const date = new Date(dateTo);
+          if (!isNaN(date.getTime())) {
+            searchCriteria.push(['BEFORE', date]);
+          }
+        }
+
+        if (fromEmail) {
+          searchCriteria.push(['FROM', fromEmail]);
+        }
+
+        if (query) {
+          searchCriteria.push(['OR', ['SUBJECT', query], ['BODY', query]]);
+        }
+
+        if (searchCriteria.length === 0) {
+          searchCriteria.push('ALL');
+        }
+
+        this.imap.search(searchCriteria, (err: Error, results: number[]) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          if (!results || results.length === 0) {
+            resolve([]);
+            return;
+          }
+
+          const messageIds = results.slice(-limit);
+          const fetch = this.imap.fetch(messageIds, {
+            bodies: '',
+            struct: true,
+          });
+
+          const messages: EmailMessage[] = [];
+
+          fetch.on('message', (msg: ImapMessage, seqno: number) => {
+            let emailData = '';
+
+            msg.on('body', (stream: NodeJS.ReadableStream) => {
+              stream.on('data', (chunk: Buffer) => {
+                emailData += chunk.toString('utf8');
+              });
+
+              stream.once('end', async () => {
+                try {
+                  const parsed: ParsedMail = await simpleParser(emailData);
+
+                  const attachments: Attachment[] = [];
+                  if (parsed.attachments) {
+                    parsed.attachments.forEach((att: MailparserAttachment) => {
+                      attachments.push({
+                        filename: att.filename || 'unknown',
+                        contentType:
+                          att.contentType || 'application/octet-stream',
+                        size: att.size || 0,
+                        data: att.content,
+                      });
+                    });
+                  }
+
+                  const getEmailText = (
+                    addr:
+                      | MailparserAddressObject
+                      | MailparserAddressObject[]
+                      | undefined
+                  ) => {
+                    if (!addr) return '';
+                    if (Array.isArray(addr))
+                      return addr.map((a) => a.text).join(', ');
+                    return addr.text;
+                  };
+
+                  const emailMessage: EmailMessage = {
+                    id: parsed.messageId || `${seqno}`,
+                    from: getEmailText(parsed.from),
+                    to: parsed.to
+                      ? Array.isArray(parsed.to)
+                        ? parsed.to.map((t) => getEmailText(t))
+                        : [getEmailText(parsed.to)]
+                      : [],
+                    subject: parsed.subject || '',
+                    body: parsed.text || parsed.html || '',
+                    date: parsed.date || new Date(),
+                    flags: [],
+                    attachments:
+                      attachments.length > 0 ? attachments : undefined,
+                  };
+
+                  messages.push(emailMessage);
+                } catch (parseError) {
+                  console.error('Error parsing email:', parseError);
+                }
+              });
+            });
+
+            msg.once('attributes', (attrs: ImapMessageAttributes) => {
+              if (attrs.flags) {
+                const lastMessage = messages[messages.length - 1];
+                if (lastMessage) {
+                  lastMessage.flags = attrs.flags;
+                }
+              }
+            });
+          });
+
+          fetch.once('error', (fetchErr: Error) => {
+            reject(fetchErr);
+          });
+
+          fetch.once('end', () => {
+            resolve(messages);
           });
         });
       });

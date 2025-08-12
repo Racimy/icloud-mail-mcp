@@ -37,3 +37,13 @@ export interface SendEmailOptions {
     contentType?: string;
   }>;
 }
+
+export interface SearchOptions {
+  query?: string;
+  mailbox?: string;
+  limit?: number;
+  dateFrom?: string;
+  dateTo?: string;
+  fromEmail?: string;
+  unreadOnly?: boolean;
+}

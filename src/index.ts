@@ -195,6 +195,47 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'search_messages',
+        description: 'Search for messages using various criteria',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description:
+                'Search query text (searches in subject, from, body)',
+            },
+            mailbox: {
+              type: 'string',
+              description: 'Mailbox name (default: INBOX)',
+              default: 'INBOX',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of messages to retrieve',
+              default: 10,
+            },
+            dateFrom: {
+              type: 'string',
+              description: 'Start date for search (YYYY-MM-DD format)',
+            },
+            dateTo: {
+              type: 'string',
+              description: 'End date for search (YYYY-MM-DD format)',
+            },
+            fromEmail: {
+              type: 'string',
+              description: 'Filter by sender email address',
+            },
+            unreadOnly: {
+              type: 'boolean',
+              description: 'Search only unread messages',
+              default: false,
+            },
+          },
+        },
+      },
+      {
         name: 'check_config',
         description: 'Check if environment variables are properly configured',
         inputSchema: {
@@ -400,6 +441,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'search_messages': {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
+          );
+        }
+
+        const query = args?.query as string;
+        const mailbox = (args?.mailbox as string) || 'INBOX';
+        const limit = (args?.limit as number) || 10;
+        const dateFrom = args?.dateFrom as string;
+        const dateTo = args?.dateTo as string;
+        const fromEmail = args?.fromEmail as string;
+        const unreadOnly = (args?.unreadOnly as boolean) || false;
+
+        const messages = await mailClient.searchMessages({
+          query,
+          mailbox,
+          limit,
+          dateFrom,
+          dateTo,
+          fromEmail,
+          unreadOnly,
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(messages, null, 2),
             },
           ],
         };
