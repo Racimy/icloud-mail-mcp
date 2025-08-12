@@ -288,6 +288,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'download_attachment',
+        description: 'Download an attachment from a specific message',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            messageId: {
+              type: 'string',
+              description: 'Message ID containing the attachment',
+            },
+            attachmentIndex: {
+              type: 'number',
+              description: 'Index of the attachment to download (0-based)',
+              default: 0,
+            },
+            mailbox: {
+              type: 'string',
+              description: 'Mailbox name (default: INBOX)',
+              default: 'INBOX',
+            },
+          },
+          required: ['messageId'],
+        },
+      },
+      {
         name: 'check_config',
         description: 'Check if environment variables are properly configured',
         inputSchema: {
@@ -575,6 +599,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           flags,
           mailbox,
           action as 'add' | 'remove'
+        );
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'download_attachment': {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
+          );
+        }
+
+        const messageId = args?.messageId as string;
+        const attachmentIndex = (args?.attachmentIndex as number) || 0;
+        const mailbox = (args?.mailbox as string) || 'INBOX';
+
+        const result = await mailClient.downloadAttachment(
+          messageId,
+          attachmentIndex,
+          mailbox
         );
 
         return {

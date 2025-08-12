@@ -805,4 +805,132 @@ export class iCloudMailClient {
       });
     });
   }
+
+  async downloadAttachment(
+    messageId: string,
+    attachmentIndex: number = 0,
+    mailbox: string = 'INBOX'
+  ): Promise<{
+    status: string;
+    message: string;
+    attachment?: {
+      filename: string;
+      contentType: string;
+      size: number;
+      data: string;
+    };
+  }> {
+    return new Promise((resolve) => {
+      this.imap.openBox(mailbox, true, (err: Error) => {
+        if (err) {
+          resolve({
+            status: 'error',
+            message: `Failed to open mailbox '${mailbox}': ${err.message}`,
+          });
+          return;
+        }
+
+        this.imap.search(['ALL'], (err: Error, results: number[]) => {
+          if (err) {
+            resolve({
+              status: 'error',
+              message: `Failed to search messages: ${err.message}`,
+            });
+            return;
+          }
+
+          if (!results || results.length === 0) {
+            resolve({
+              status: 'error',
+              message: 'No messages found in mailbox',
+            });
+            return;
+          }
+
+          const fetch = this.imap.fetch(results, {
+            bodies: '',
+            struct: true,
+          });
+
+          let found = false;
+
+          fetch.on('message', (msg: ImapMessage, seqno: number) => {
+            if (found) return;
+
+            let emailData = '';
+
+            msg.on('body', (stream: NodeJS.ReadableStream) => {
+              stream.on('data', (chunk: Buffer) => {
+                emailData += chunk.toString('utf8');
+              });
+
+              stream.once('end', async () => {
+                try {
+                  const parsed: ParsedMail = await simpleParser(emailData);
+
+                  if (
+                    parsed.messageId === messageId ||
+                    `${seqno}` === messageId
+                  ) {
+                    found = true;
+
+                    if (
+                      !parsed.attachments ||
+                      parsed.attachments.length === 0
+                    ) {
+                      resolve({
+                        status: 'error',
+                        message: 'No attachments found in the message',
+                      });
+                      return;
+                    }
+
+                    if (attachmentIndex >= parsed.attachments.length) {
+                      resolve({
+                        status: 'error',
+                        message: `Attachment index ${attachmentIndex} out of range. Message has ${parsed.attachments.length} attachments`,
+                      });
+                      return;
+                    }
+
+                    const attachment = parsed.attachments[attachmentIndex];
+
+                    resolve({
+                      status: 'success',
+                      message: `Successfully downloaded attachment '${attachment.filename}'`,
+                      attachment: {
+                        filename: attachment.filename || 'unknown',
+                        contentType:
+                          attachment.contentType || 'application/octet-stream',
+                        size: attachment.size || 0,
+                        data: attachment.content.toString('base64'),
+                      },
+                    });
+                  }
+                } catch (parseError) {
+                  console.error('Error parsing email:', parseError);
+                }
+              });
+            });
+          });
+
+          fetch.once('error', (fetchErr: Error) => {
+            resolve({
+              status: 'error',
+              message: `Failed to fetch messages: ${fetchErr.message}`,
+            });
+          });
+
+          fetch.once('end', () => {
+            if (!found) {
+              resolve({
+                status: 'error',
+                message: `Message with ID '${messageId}' not found`,
+              });
+            }
+          });
+        });
+      });
+    });
+  }
 }
