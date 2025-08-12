@@ -39,3 +39,11 @@
 - Enhanced input validation for mailbox operations
 
 **Full Changelog**: https://github.com/minagishl/icloud-mail-mcp/compare/v1.0.0...v1.0.1
+
+---
+
+## v1.0.0 (2025-07-22)
+
+This is the initial release of iCloud Mail MCP Server.
+
+**Full Changelog**: https://github.com/minagishl/icloud-mail-mcp/commits/v1.0.0
