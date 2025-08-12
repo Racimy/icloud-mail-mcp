@@ -691,4 +691,64 @@ export class iCloudMailClient {
       });
     });
   }
+
+  async deleteMessages(
+    messageIds: string[],
+    mailbox: string = 'INBOX'
+  ): Promise<{ status: string; message: string }> {
+    return new Promise((resolve) => {
+      this.imap.openBox(mailbox, false, (err: Error) => {
+        if (err) {
+          resolve({
+            status: 'error',
+            message: `Failed to open mailbox '${mailbox}': ${err.message}`,
+          });
+          return;
+        }
+
+        this.imap.search(['ALL'], (err: Error, results: number[]) => {
+          if (err) {
+            resolve({
+              status: 'error',
+              message: `Failed to search messages: ${err.message}`,
+            });
+            return;
+          }
+
+          if (!results || results.length === 0) {
+            resolve({
+              status: 'error',
+              message: 'No messages found in mailbox',
+            });
+            return;
+          }
+
+          this.imap.addFlags(results, ['\\Deleted'], (err: Error) => {
+            if (err) {
+              resolve({
+                status: 'error',
+                message: `Failed to mark messages for deletion: ${err.message}`,
+              });
+              return;
+            }
+
+            this.imap.expunge((err: Error) => {
+              if (err) {
+                resolve({
+                  status: 'error',
+                  message: `Failed to expunge deleted messages: ${err.message}`,
+                });
+                return;
+              }
+
+              resolve({
+                status: 'success',
+                message: `Successfully deleted ${results.length} messages from '${mailbox}'`,
+              });
+            });
+          });
+        });
+      });
+    });
+  }
 }

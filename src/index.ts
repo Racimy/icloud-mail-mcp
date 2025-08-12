@@ -236,6 +236,26 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'delete_messages',
+        description: 'Delete messages from a mailbox',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            messageIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of message IDs to delete',
+            },
+            mailbox: {
+              type: 'string',
+              description: 'Mailbox name (default: INBOX)',
+              default: 'INBOX',
+            },
+          },
+          required: ['messageIds'],
+        },
+      },
+      {
         name: 'check_config',
         description: 'Check if environment variables are properly configured',
         inputSchema: {
@@ -477,6 +497,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(messages, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'delete_messages': {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
+          );
+        }
+
+        const messageIds = args?.messageIds as string[];
+        const mailbox = (args?.mailbox as string) || 'INBOX';
+
+        const result = await mailClient.deleteMessages(messageIds, mailbox);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };
