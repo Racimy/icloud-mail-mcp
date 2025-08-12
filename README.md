@@ -108,6 +108,20 @@ Create a new mailbox (folder) in your iCloud Mail account.
 
 - `name` (string, required): Name of the mailbox to create
 
+### `delete_mailbox`
+
+Delete an existing mailbox (folder) from your iCloud Mail account.
+
+**Parameters:**
+
+- `name` (string, required): Name of the mailbox to delete
+
+**Safety Features:**
+
+- Prevents deletion of system mailboxes (INBOX, Sent, Trash, Drafts, Junk)
+- Validates mailbox name input
+- Provides detailed error messages for common issues
+
 ### `move_messages`
 
 Move messages between mailboxes.
@@ -181,7 +195,18 @@ Check if environment variables are properly configured and show connection statu
    }
    ```
 
-6. **Move messages between mailboxes:**
+6. **Delete a mailbox:**
+
+   ```json
+   {
+     "tool": "delete_mailbox",
+     "arguments": {
+       "name": "My Custom Folder"
+     }
+   }
+   ```
+
+7. **Move messages between mailboxes:**
 
    ```json
    {
@@ -194,7 +219,7 @@ Check if environment variables are properly configured and show connection statu
    }
    ```
 
-7. **Check configuration:**
+8. **Check configuration:**
    ```json
    {
      "tool": "check_config",
