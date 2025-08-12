@@ -751,4 +751,58 @@ export class iCloudMailClient {
       });
     });
   }
+
+  async setFlags(
+    messageIds: string[],
+    flags: string[],
+    mailbox: string = 'INBOX',
+    action: 'add' | 'remove' = 'add'
+  ): Promise<{ status: string; message: string }> {
+    return new Promise((resolve) => {
+      this.imap.openBox(mailbox, false, (err: Error) => {
+        if (err) {
+          resolve({
+            status: 'error',
+            message: `Failed to open mailbox '${mailbox}': ${err.message}`,
+          });
+          return;
+        }
+
+        this.imap.search(['ALL'], (err: Error, results: number[]) => {
+          if (err) {
+            resolve({
+              status: 'error',
+              message: `Failed to search messages: ${err.message}`,
+            });
+            return;
+          }
+
+          if (!results || results.length === 0) {
+            resolve({
+              status: 'error',
+              message: 'No messages found in mailbox',
+            });
+            return;
+          }
+
+          const flagOperation = action === 'add' ? 'addFlags' : 'delFlags';
+
+          this.imap[flagOperation](results, flags, (err: Error) => {
+            if (err) {
+              resolve({
+                status: 'error',
+                message: `Failed to ${action} flags: ${err.message}`,
+              });
+              return;
+            }
+
+            resolve({
+              status: 'success',
+              message: `Successfully ${action === 'add' ? 'added' : 'removed'} flags [${flags.join(', ')}] ${action === 'add' ? 'to' : 'from'} ${results.length} messages in '${mailbox}'`,
+            });
+          });
+        });
+      });
+    });
+  }
 }

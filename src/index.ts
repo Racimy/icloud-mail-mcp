@@ -256,6 +256,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'set_flags',
+        description: 'Set flags on messages (read, unread, flagged, etc.)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            messageIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of message IDs to set flags on',
+            },
+            flags: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'Array of flags to set (e.g., ["\\Seen", "\\Flagged"])',
+            },
+            mailbox: {
+              type: 'string',
+              description: 'Mailbox name (default: INBOX)',
+              default: 'INBOX',
+            },
+            action: {
+              type: 'string',
+              enum: ['add', 'remove'],
+              description: 'Whether to add or remove the flags (default: add)',
+              default: 'add',
+            },
+          },
+          required: ['messageIds', 'flags'],
+        },
+      },
+      {
         name: 'check_config',
         description: 'Check if environment variables are properly configured',
         inputSchema: {
@@ -514,6 +546,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const mailbox = (args?.mailbox as string) || 'INBOX';
 
         const result = await mailClient.deleteMessages(messageIds, mailbox);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'set_flags': {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
+          );
+        }
+
+        const messageIds = args?.messageIds as string[];
+        const flags = args?.flags as string[];
+        const mailbox = (args?.mailbox as string) || 'INBOX';
+        const action = (args?.action as string) || 'add';
+
+        const result = await mailClient.setFlags(
+          messageIds,
+          flags,
+          mailbox,
+          action as 'add' | 'remove'
+        );
 
         return {
           content: [
