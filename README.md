@@ -58,6 +58,9 @@ Add to your MCP server configuration:
 
 ## Available Tools
 
+<details>
+<summary><strong>Email Operations</strong></summary>
+
 ### `get_messages`
 
 Retrieve email messages from a specified mailbox.
@@ -88,15 +91,24 @@ Mark email messages as read.
 - `messageIds` (array, required): Array of message IDs to mark as read
 - `mailbox` (string, optional): Mailbox name (default: "INBOX")
 
+### `move_messages`
+
+Move messages between mailboxes.
+
+**Parameters:**
+
+- `messageIds` (array, required): Array of message IDs to move
+- `sourceMailbox` (string, required): Source mailbox name
+- `destinationMailbox` (string, required): Destination mailbox name
+
+</details>
+
+<details>
+<summary><strong>Mailbox Management</strong></summary>
+
 ### `get_mailboxes`
 
 List all available mailboxes in your iCloud Mail account.
-
-**Parameters:** None
-
-### `test_connection`
-
-Test the email server connection to verify IMAP and SMTP connectivity.
 
 **Parameters:** None
 
@@ -122,15 +134,16 @@ Delete an existing mailbox (folder) from your iCloud Mail account.
 - Validates mailbox name input
 - Provides detailed error messages for common issues
 
-### `move_messages`
+</details>
 
-Move messages between mailboxes.
+<details>
+<summary><strong>System Tools</strong></summary>
 
-**Parameters:**
+### `test_connection`
 
-- `messageIds` (array, required): Array of message IDs to move
-- `sourceMailbox` (string, required): Source mailbox name
-- `destinationMailbox` (string, required): Destination mailbox name
+Test the email server connection to verify IMAP and SMTP connectivity.
+
+**Parameters:** None
 
 ### `check_config`
 
@@ -138,94 +151,117 @@ Check if environment variables are properly configured and show connection statu
 
 **Parameters:** None
 
+</details>
+
 ## Usage Example
 
-1. **Start the MCP server:**
+<details>
+<summary><strong>Getting Started</strong></summary>
 
-   ```bash
-   # With environment variables (recommended)
-   ICLOUD_EMAIL="your-email@icloud.com" ICLOUD_APP_PASSWORD="your-app-password" pnpm run start
+**Start the MCP server:**
 
-   # Or start normally and configure manually
-   pnpm run start
-   ```
+```bash
+# With environment variables (recommended)
+ICLOUD_EMAIL="your-email@icloud.com" ICLOUD_APP_PASSWORD="your-app-password" pnpm run start
 
-2. **Get recent messages:**
+# Or start normally and configure manually
+pnpm run start
+```
 
-   ```json
-   {
-     "tool": "get_messages",
-     "arguments": {
-       "limit": 5,
-       "unreadOnly": true
-     }
-   }
-   ```
+</details>
 
-3. **Send an email:**
+<details>
+<summary><strong>Email Operations</strong></summary>
 
-   ```json
-   {
-     "tool": "send_email",
-     "arguments": {
-       "to": "recipient@example.com",
-       "subject": "Hello from MCP",
-       "text": "This email was sent using the iCloud Mail MCP server!"
-     }
-   }
-   ```
+**Get recent messages:**
 
-4. **Test connection:**
+```json
+{
+  "tool": "get_messages",
+  "arguments": {
+    "limit": 5,
+    "unreadOnly": true
+  }
+}
+```
 
-   ```json
-   {
-     "tool": "test_connection",
-     "arguments": {}
-   }
-   ```
+**Send an email:**
 
-5. **Create a new mailbox:**
+```json
+{
+  "tool": "send_email",
+  "arguments": {
+    "to": "recipient@example.com",
+    "subject": "Hello from MCP",
+    "text": "This email was sent using the iCloud Mail MCP server!"
+  }
+}
+```
 
-   ```json
-   {
-     "tool": "create_mailbox",
-     "arguments": {
-       "name": "My Custom Folder"
-     }
-   }
-   ```
+**Move messages between mailboxes:**
 
-6. **Delete a mailbox:**
+```json
+{
+  "tool": "move_messages",
+  "arguments": {
+    "messageIds": ["message-id-1", "message-id-2"],
+    "sourceMailbox": "INBOX",
+    "destinationMailbox": "My Custom Folder"
+  }
+}
+```
 
-   ```json
-   {
-     "tool": "delete_mailbox",
-     "arguments": {
-       "name": "My Custom Folder"
-     }
-   }
-   ```
+</details>
 
-7. **Move messages between mailboxes:**
+<details>
+<summary><strong>Mailbox Management</strong></summary>
 
-   ```json
-   {
-     "tool": "move_messages",
-     "arguments": {
-       "messageIds": ["message-id-1", "message-id-2"],
-       "sourceMailbox": "INBOX",
-       "destinationMailbox": "My Custom Folder"
-     }
-   }
-   ```
+**Create a new mailbox:**
 
-8. **Check configuration:**
-   ```json
-   {
-     "tool": "check_config",
-     "arguments": {}
-   }
-   ```
+```json
+{
+  "tool": "create_mailbox",
+  "arguments": {
+    "name": "My Custom Folder"
+  }
+}
+```
+
+**Delete a mailbox:**
+
+```json
+{
+  "tool": "delete_mailbox",
+  "arguments": {
+    "name": "My Custom Folder"
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>System Tools</strong></summary>
+
+**Test connection:**
+
+```json
+{
+  "tool": "test_connection",
+  "arguments": {}
+}
+```
+
+**Check configuration:**
+
+```json
+{
+  "tool": "check_config",
+  "arguments": {}
+}
+```
+
+</details>
 
 ## Security Notes
 
