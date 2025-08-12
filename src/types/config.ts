@@ -47,3 +47,14 @@ export interface SearchOptions {
   fromEmail?: string;
   unreadOnly?: boolean;
 }
+
+export interface OrganizationRule {
+  name: string;
+  condition: {
+    fromContains?: string;
+    subjectContains?: string;
+  };
+  action: {
+    moveToMailbox: string;
+  };
+}

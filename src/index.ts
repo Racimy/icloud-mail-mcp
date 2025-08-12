@@ -312,6 +312,66 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'auto_organize',
+        description:
+          'Automatically organize emails based on rules (sender, subject keywords, etc.)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            rules: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                    description: 'Rule name',
+                  },
+                  condition: {
+                    type: 'object',
+                    properties: {
+                      fromContains: {
+                        type: 'string',
+                        description: 'Move emails if sender contains this text',
+                      },
+                      subjectContains: {
+                        type: 'string',
+                        description:
+                          'Move emails if subject contains this text',
+                      },
+                    },
+                  },
+                  action: {
+                    type: 'object',
+                    properties: {
+                      moveToMailbox: {
+                        type: 'string',
+                        description: 'Mailbox to move matching emails to',
+                      },
+                    },
+                    required: ['moveToMailbox'],
+                  },
+                },
+                required: ['name', 'condition', 'action'],
+              },
+              description: 'Array of organization rules',
+            },
+            sourceMailbox: {
+              type: 'string',
+              description: 'Source mailbox to organize (default: INBOX)',
+              default: 'INBOX',
+            },
+            dryRun: {
+              type: 'boolean',
+              description:
+                'If true, only shows what would be organized without moving emails',
+              default: false,
+            },
+          },
+          required: ['rules'],
+        },
+      },
+      {
         name: 'check_config',
         description: 'Check if environment variables are properly configured',
         inputSchema: {
@@ -627,6 +687,43 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           messageId,
           attachmentIndex,
           mailbox
+        );
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'auto_organize': {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
+          );
+        }
+
+        const rules = args?.rules as Array<{
+          name: string;
+          condition: {
+            fromContains?: string;
+            subjectContains?: string;
+          };
+          action: {
+            moveToMailbox: string;
+          };
+        }>;
+        const sourceMailbox = (args?.sourceMailbox as string) || 'INBOX';
+        const dryRun = (args?.dryRun as boolean) || false;
+
+        const result = await mailClient.autoOrganize(
+          rules,
+          sourceMailbox,
+          dryRun
         );
 
         return {

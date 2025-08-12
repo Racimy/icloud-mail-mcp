@@ -12,6 +12,7 @@ import {
   SendEmailOptions,
   Attachment,
   SearchOptions,
+  OrganizationRule,
 } from '../types/config.js';
 
 // Type definitions for IMAP
@@ -932,5 +933,131 @@ export class iCloudMailClient {
         });
       });
     });
+  }
+
+  async autoOrganize(
+    rules: OrganizationRule[],
+    sourceMailbox: string = 'INBOX',
+    dryRun: boolean = false
+  ): Promise<{
+    status: string;
+    message: string;
+    results: Array<{
+      rule: string;
+      matchedMessages: number;
+      moved: boolean;
+      messages?: Array<{
+        id: string;
+        from: string;
+        subject: string;
+        destinationMailbox: string;
+      }>;
+    }>;
+  }> {
+    try {
+      const messages = await this.getMessages(sourceMailbox, 100);
+      const results: Array<{
+        rule: string;
+        matchedMessages: number;
+        moved: boolean;
+        messages?: Array<{
+          id: string;
+          from: string;
+          subject: string;
+          destinationMailbox: string;
+        }>;
+      }> = [];
+
+      for (const rule of rules) {
+        const matchedMessages: Array<{
+          id: string;
+          from: string;
+          subject: string;
+          destinationMailbox: string;
+        }> = [];
+
+        for (const message of messages) {
+          let matches = false;
+
+          if (rule.condition.fromContains) {
+            matches =
+              matches ||
+              message.from
+                .toLowerCase()
+                .includes(rule.condition.fromContains.toLowerCase());
+          }
+
+          if (rule.condition.subjectContains) {
+            matches =
+              matches ||
+              message.subject
+                .toLowerCase()
+                .includes(rule.condition.subjectContains.toLowerCase());
+          }
+
+          if (matches) {
+            matchedMessages.push({
+              id: message.id,
+              from: message.from,
+              subject: message.subject,
+              destinationMailbox: rule.action.moveToMailbox,
+            });
+          }
+        }
+
+        if (matchedMessages.length > 0) {
+          let moved = false;
+
+          if (!dryRun) {
+            try {
+              const messageIds = matchedMessages.map((m) => m.id);
+              await this.moveMessages(
+                messageIds,
+                sourceMailbox,
+                rule.action.moveToMailbox
+              );
+              moved = true;
+            } catch (moveError) {
+              console.error(
+                `Failed to move messages for rule '${rule.name}':`,
+                moveError
+              );
+            }
+          }
+
+          results.push({
+            rule: rule.name,
+            matchedMessages: matchedMessages.length,
+            moved: !dryRun && moved,
+            messages: matchedMessages,
+          });
+        } else {
+          results.push({
+            rule: rule.name,
+            matchedMessages: 0,
+            moved: false,
+          });
+        }
+      }
+
+      const totalMatched = results.reduce(
+        (sum, result) => sum + result.matchedMessages,
+        0
+      );
+
+      return {
+        status: 'success',
+        message: dryRun
+          ? `Dry run completed. Found ${totalMatched} messages matching organization rules`
+          : `Organization completed. Processed ${totalMatched} messages`,
+        results,
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: `Failed to organize emails: ${error instanceof Error ? error.message : String(error)}`,
+        results: [],
+      };
+    }
   }
 }
