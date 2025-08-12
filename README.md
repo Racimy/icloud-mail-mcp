@@ -59,9 +59,11 @@ Add to your MCP server configuration:
 ## Available Tools
 
 <details>
-<summary><strong>Email Operations</strong></summary>
+<summary><strong>Click to view all available tools</strong></summary>
 
-### `get_messages`
+### Email Operations
+
+#### `get_messages`
 
 Retrieve email messages from a specified mailbox.
 
@@ -71,7 +73,7 @@ Retrieve email messages from a specified mailbox.
 - `limit` (number, optional): Maximum number of messages to retrieve (default: 10)
 - `unreadOnly` (boolean, optional): Retrieve only unread messages (default: false)
 
-### `send_email`
+#### `send_email`
 
 Send an email through iCloud Mail.
 
@@ -82,7 +84,7 @@ Send an email through iCloud Mail.
 - `text` (string, optional): Plain text email body
 - `html` (string, optional): HTML email body
 
-### `mark_as_read`
+#### `mark_as_read`
 
 Mark email messages as read.
 
@@ -91,7 +93,7 @@ Mark email messages as read.
 - `messageIds` (array, required): Array of message IDs to mark as read
 - `mailbox` (string, optional): Mailbox name (default: "INBOX")
 
-### `move_messages`
+#### `move_messages`
 
 Move messages between mailboxes.
 
@@ -101,18 +103,15 @@ Move messages between mailboxes.
 - `sourceMailbox` (string, required): Source mailbox name
 - `destinationMailbox` (string, required): Destination mailbox name
 
-</details>
+### Mailbox Management
 
-<details>
-<summary><strong>Mailbox Management</strong></summary>
-
-### `get_mailboxes`
+#### `get_mailboxes`
 
 List all available mailboxes in your iCloud Mail account.
 
 **Parameters:** None
 
-### `create_mailbox`
+#### `create_mailbox`
 
 Create a new mailbox (folder) in your iCloud Mail account.
 
@@ -120,7 +119,7 @@ Create a new mailbox (folder) in your iCloud Mail account.
 
 - `name` (string, required): Name of the mailbox to create
 
-### `delete_mailbox`
+#### `delete_mailbox`
 
 Delete an existing mailbox (folder) from your iCloud Mail account.
 
@@ -134,18 +133,15 @@ Delete an existing mailbox (folder) from your iCloud Mail account.
 - Validates mailbox name input
 - Provides detailed error messages for common issues
 
-</details>
+### System Tools
 
-<details>
-<summary><strong>System Tools</strong></summary>
-
-### `test_connection`
+#### `test_connection`
 
 Test the email server connection to verify IMAP and SMTP connectivity.
 
 **Parameters:** None
 
-### `check_config`
+#### `check_config`
 
 Check if environment variables are properly configured and show connection status.
 
@@ -156,7 +152,9 @@ Check if environment variables are properly configured and show connection statu
 ## Usage Example
 
 <details>
-<summary><strong>Getting Started</strong></summary>
+<summary><strong>Click to view usage examples</strong></summary>
+
+### Getting Started
 
 **Start the MCP server:**
 
@@ -168,10 +166,7 @@ ICLOUD_EMAIL="your-email@icloud.com" ICLOUD_APP_PASSWORD="your-app-password" pnp
 pnpm run start
 ```
 
-</details>
-
-<details>
-<summary><strong>Email Operations</strong></summary>
+### Email Operations
 
 **Get recent messages:**
 
@@ -211,10 +206,7 @@ pnpm run start
 }
 ```
 
-</details>
-
-<details>
-<summary><strong>Mailbox Management</strong></summary>
+### Mailbox Management
 
 **Create a new mailbox:**
 
@@ -238,10 +230,7 @@ pnpm run start
 }
 ```
 
-</details>
-
-<details>
-<summary><strong>System Tools</strong></summary>
+### System Tools
 
 **Test connection:**
 
