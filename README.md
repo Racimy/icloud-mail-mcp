@@ -103,6 +103,74 @@ Move messages between mailboxes.
 - `sourceMailbox` (string, required): Source mailbox name
 - `destinationMailbox` (string, required): Destination mailbox name
 
+#### `search_messages`
+
+Search for messages using various criteria.
+
+**Parameters:**
+
+- `query` (string, optional): Search query text (searches in subject, from, body)
+- `mailbox` (string, optional): Mailbox name (default: "INBOX")
+- `limit` (number, optional): Maximum number of messages to retrieve (default: 10)
+- `dateFrom` (string, optional): Start date for search (YYYY-MM-DD format)
+- `dateTo` (string, optional): End date for search (YYYY-MM-DD format)
+- `fromEmail` (string, optional): Filter by sender email address
+- `unreadOnly` (boolean, optional): Search only unread messages (default: false)
+
+#### `delete_messages`
+
+Delete messages from a mailbox.
+
+**Parameters:**
+
+- `messageIds` (array, required): Array of message IDs to delete
+- `mailbox` (string, optional): Mailbox name (default: "INBOX")
+
+#### `set_flags`
+
+Set flags on messages (read, unread, flagged, etc.).
+
+**Parameters:**
+
+- `messageIds` (array, required): Array of message IDs to set flags on
+- `flags` (array, required): Array of flags to set (e.g., ["\\Seen", "\\Flagged"])
+- `mailbox` (string, optional): Mailbox name (default: "INBOX")
+- `action` (string, optional): Whether to "add" or "remove" the flags (default: "add")
+
+#### `download_attachment`
+
+Download an attachment from a specific message.
+
+**Parameters:**
+
+- `messageId` (string, required): Message ID containing the attachment
+- `attachmentIndex` (number, optional): Index of the attachment to download (0-based, default: 0)
+- `mailbox` (string, optional): Mailbox name (default: "INBOX")
+
+#### `auto_organize`
+
+Automatically organize emails based on rules (sender, subject keywords, etc.).
+
+**Parameters:**
+
+- `rules` (array, required): Array of organization rules with conditions and actions
+- `sourceMailbox` (string, optional): Source mailbox to organize (default: "INBOX")
+- `dryRun` (boolean, optional): If true, only shows what would be organized without moving emails (default: false)
+
+**Rule Structure:**
+```json
+{
+  "name": "Rule name",
+  "condition": {
+    "fromContains": "sender keyword",
+    "subjectContains": "subject keyword"
+  },
+  "action": {
+    "moveToMailbox": "destination folder"
+  }
+}
+```
+
 ### Mailbox Management
 
 #### `get_mailboxes`

@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.1.0 (2025-08-12)
+
+### New Features
+
+- **search_messages**: Advanced email search with multiple criteria (query text, date range, sender filtering)
+- **delete_messages**: Bulk message deletion functionality with proper flag handling
+- **set_flags**: Message flag management (add/remove flags like \\Seen, \\Flagged)
+- **download_attachment**: Download specific attachments from messages with base64 encoding
+- **auto_organize**: Intelligent email organization with customizable rules based on sender and subject
+
+### Improvements
+
+- Enhanced type safety with proper TypeScript interfaces
+- Improved error handling across all new functions
+- Better code organization with reusable components
+- Consistent API design patterns
+
+### Technical Details
+
+- Added `SearchOptions` and `OrganizationRule` interfaces
+- Implemented comprehensive IMAP search criteria handling
+- Enhanced attachment processing with proper content type detection
+- Dry-run capability for organization testing
+
+**Full Changelog**: https://github.com/minagishl/icloud-mail-mcp/compare/v1.0.2...v1.1.0
+
+---
+
 ## v1.0.2 (2025-08-13)
 
 ### Documentation Improvements
