@@ -158,6 +158,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'delete_mailbox',
+        description: 'Delete an existing mailbox (folder)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Name of the mailbox to delete',
+            },
+          },
+          required: ['name'],
+        },
+      },
+      {
         name: 'move_messages',
         description: 'Move messages between mailboxes',
         inputSchema: {
@@ -323,6 +337,35 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         const mailboxName = args?.name as string;
         const result = await mailClient.createMailbox(mailboxName);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'delete_mailbox': {
+        if (!mailClient) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            'iCloud Mail not configured. Please set ICLOUD_EMAIL and ICLOUD_APP_PASSWORD environment variables.'
+          );
+        }
+
+        const mailboxName = args?.name as string;
+
+        if (!mailboxName) {
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            'Mailbox name is required'
+          );
+        }
+
+        const result = await mailClient.deleteMailbox(mailboxName);
 
         return {
           content: [

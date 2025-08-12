@@ -433,6 +433,56 @@ export class iCloudMailClient {
     });
   }
 
+  async deleteMailbox(
+    name: string
+  ): Promise<{ status: string; message: string }> {
+    if (!name || name.trim() === '') {
+      return {
+        status: 'error',
+        message: 'Mailbox name cannot be empty',
+      };
+    }
+
+    const trimmedName = name.trim();
+
+    // Prevent deletion of important system mailboxes
+    const systemMailboxes = ['INBOX', 'Sent', 'Trash', 'Drafts', 'Junk'];
+    if (systemMailboxes.includes(trimmedName)) {
+      return {
+        status: 'error',
+        message: `Cannot delete system mailbox '${trimmedName}'`,
+      };
+    }
+
+    return new Promise((resolve) => {
+      this.imap.delBox(trimmedName, (err: Error) => {
+        if (err) {
+          let errorMessage = err.message;
+
+          // Provide more helpful error messages for common issues
+          if (err.message.includes('does not exist')) {
+            errorMessage = `Mailbox '${trimmedName}' does not exist`;
+          } else if (err.message.includes('not empty')) {
+            errorMessage = `Cannot delete mailbox '${trimmedName}' because it contains messages. Please move or delete all messages first.`;
+          } else if (err.message.includes('permission')) {
+            errorMessage = `Permission denied: Cannot delete mailbox '${trimmedName}'`;
+          }
+
+          resolve({
+            status: 'error',
+            message: errorMessage,
+          });
+          return;
+        }
+
+        resolve({
+          status: 'success',
+          message: `Mailbox '${trimmedName}' deleted successfully`,
+        });
+      });
+    });
+  }
+
   async moveMessages(
     messageIds: string[],
     sourceMailbox: string,
