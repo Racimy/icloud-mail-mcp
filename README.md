@@ -158,6 +158,7 @@ Automatically organize emails based on rules (sender, subject keywords, etc.).
 - `dryRun` (boolean, optional): If true, only shows what would be organized without moving emails (default: false)
 
 **Rule Structure:**
+
 ```json
 {
   "name": "Rule name",
@@ -341,7 +342,67 @@ pnpm run build
 
 # Type checking
 pnpm run typecheck
+
+# Run tests
+pnpm run test
+
+# Run linting
+pnpm run lint
 ```
+
+## Testing
+
+This project includes comprehensive test coverage using Vitest. The test suite covers:
+
+### Test Structure
+
+- **Total Tests**: 29 tests across 3 test files
+- **Framework**: Vitest with TypeScript support
+- **Coverage**: Core functionality, type definitions, and configuration
+
+### Test Categories
+
+#### 1. Core Client Tests (`src/lib/icloud-mail-client.test.ts`)
+
+- **Constructor validation**: Tests client creation with various configurations
+- **Email name extraction**: Tests handling of different email formats
+- **Basic functionality**: Tests core client behavior and configuration validation
+
+#### 2. Type Definition Tests (`src/types/config.test.ts`)
+
+- **iCloudConfig**: Tests configuration object structure
+- **EmailMessage**: Tests email message data types
+- **SendEmailOptions**: Tests email sending parameter validation
+- **SearchOptions**: Tests search parameter structures
+- **OrganizationRule**: Tests email organization rule definitions
+- **Attachment**: Tests attachment data structures
+
+#### 3. Server Configuration Tests (`src/index.test.ts`)
+
+- **Environment variables**: Tests handling of configuration environment variables
+- **Credential masking**: Tests security functions for hiding sensitive data
+- **Config validation**: Tests basic configuration validation logic
+
+### Running Tests
+
+```bash
+# Run all tests once
+pnpm run test:run
+
+# Run tests in watch mode (interactive)
+pnpm run test
+
+# Run tests with UI interface
+pnpm run test:ui
+```
+
+### Test Features
+
+- **Type Safety**: All tests are written in TypeScript without using `any`
+- **Mocking**: External dependencies (IMAP, SMTP) are properly mocked
+- **Coverage**: Tests cover both happy path and edge cases
+- **Isolation**: Each test is independent and properly cleaned up
+- **Real-world scenarios**: Tests reflect actual usage patterns
 
 ## Troubleshooting
 
