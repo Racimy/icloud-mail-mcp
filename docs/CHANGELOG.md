@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1 (2025-08-17)
+
+### Testing Infrastructure
+
+- **Test Suite**: Added comprehensive test coverage with Vitest framework
+  - Core client functionality tests
+  - Type definition validation tests
+  - Server configuration tests
+- **Testing Scripts**: Added `test`, `test:ui`, and `test:run` commands
+- **Documentation**: Enhanced README with detailed testing section
+
+### Code Quality Improvements
+
+- **Test Coverage**: 29 tests across 3 test files covering core functionality
+- **Development Experience**: Added Vitest UI for interactive test development
+
+### Technical Details
+
+- Added Vitest and @vitest/ui dependencies
+- Implemented proper mocking for external dependencies (IMAP, SMTP)
+- Test isolation and cleanup for reliable test execution
+- Real-world scenario testing reflecting actual usage patterns
+
+**Full Changelog**: https://github.com/minagishl/icloud-mail-mcp/compare/v1.1.0...v1.1.1
+
+---
+
 ## v1.1.0 (2025-08-12)
 
 ### New Features

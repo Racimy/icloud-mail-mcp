@@ -381,7 +381,7 @@ export class iCloudMailClient {
   }
 
   async markAsRead(
-    messageIds: string[],
+    _messageIds: string[],
     mailbox: string = 'INBOX'
   ): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -486,7 +486,7 @@ export class iCloudMailClient {
   }
 
   async moveMessages(
-    messageIds: string[],
+    _messageIds: string[],
     sourceMailbox: string,
     destinationMailbox: string
   ): Promise<{ status: string; message: string }> {
@@ -694,7 +694,7 @@ export class iCloudMailClient {
   }
 
   async deleteMessages(
-    messageIds: string[],
+    _messageIds: string[],
     mailbox: string = 'INBOX'
   ): Promise<{ status: string; message: string }> {
     return new Promise((resolve) => {
@@ -754,7 +754,7 @@ export class iCloudMailClient {
   }
 
   async setFlags(
-    messageIds: string[],
+    _messageIds: string[],
     flags: string[],
     mailbox: string = 'INBOX',
     action: 'add' | 'remove' = 'add'

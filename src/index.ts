@@ -14,7 +14,7 @@ import { iCloudConfig } from './types/config.js';
 const server = new Server(
   {
     name: 'icloud-mail-mcp',
-    version: '1.1.0',
+    version: '1.1.1',
   },
   {
     capabilities: {
