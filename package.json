@@ -12,7 +12,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "keywords": [
     "mcp",
@@ -42,6 +45,7 @@
     "@types/mailparser": "^3.4.6",
     "@types/node": "^24.2.1",
     "@types/nodemailer": "^6.4.17",
+    "@vitest/ui": "^3.2.4",
     "esbuild": "^0.25.8",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
@@ -49,7 +53,8 @@
     "globals": "^16.3.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1"
+    "typescript-eslint": "^8.39.1",
+    "vitest": "^3.2.4"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
