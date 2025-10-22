@@ -1,5 +1,9 @@
 # iCloud Mail MCP Server
 
+<a href="https://glama.ai/mcp/servers/@Racimy/iMail-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@Racimy/iMail-mcp/badge" />
+</a>
+
 A Model Context Protocol (MCP) server for integrating with iCloud Mail using App Password authentication. This server provides tools to read, send, and manage emails through iCloud's IMAP and SMTP services.
 
 > Development logs for this project are being shared on [Hack Club's Summer of Making](https://summer.hackclub.com/projects/7559). Check it out to follow the development journey!
